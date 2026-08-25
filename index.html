@@ -34,6 +34,22 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
+    #install-btn {
+      position: absolute;
+      top: 20px;
+      padding: 10px 20px;
+      background: #00e5ff;
+      border: none;
+      border-radius: 30px;
+      color: #000;
+      font-weight: 800;
+      font-size: 13px;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+      cursor: pointer;
+    }
+
     #hud-overlay {
       position: absolute;
       top: 24px;
@@ -129,68 +145,26 @@
       transition: opacity 0.2s;
     }
 
-    .blinking .eye {
-      height: 6px !important;
-      border-radius: 4px !important;
-      box-shadow: 0 0 10px var(--eye-glow);
-    }
+    .blinking .eye { height: 6px !important; border-radius: 4px !important; box-shadow: 0 0 10px var(--eye-glow); }
     .blinking .eye::after { opacity: 0; }
-
-    .sleeping .eye {
-      height: 6px !important;
-      border-radius: 4px !important;
-      background: #475569 !important;
-      box-shadow: none !important;
-    }
+    .sleeping .eye { height: 6px !important; border-radius: 4px !important; background: #475569 !important; box-shadow: none !important; }
     .sleeping .eye::after { opacity: 0; }
-
-    .startled .eye {
-      width: 110px !important;
-      height: 145px !important;
-      border-radius: 50% !important;
-      transform: scale(1.15) !important;
-    }
-
-    .happy .eye {
-      height: 52px !important;
-      border-radius: 50px 50px 14px 14px !important;
-      transform: translateY(-14px) !important;
-    }
-
+    .startled .eye { width: 110px !important; height: 145px !important; border-radius: 50% !important; transform: scale(1.15) !important; }
+    .happy .eye { height: 52px !important; border-radius: 50px 50px 14px 14px !important; transform: translateY(-14px) !important; }
     .wink #left-eye { height: 6px !important; border-radius: 4px !important; }
     .wink #left-eye::after { opacity: 0; }
     .wink #right-eye { height: 60px !important; border-radius: 40px 40px 10px 10px !important; }
-
-    .thinking .eye {
-      height: 65px;
-      width: 82px;
-      background: #c084fc !important;
-      box-shadow: 0 0 30px rgba(192, 132, 252, 0.9) !important;
-      transform: translateY(-24px) !important;
-    }
-
-    .dancing .eye {
-      animation: beat-bounce 0.35s infinite alternate ease-in-out;
-    }
-    @keyframes beat-bounce {
-      0% { transform: translateY(12px) scaleY(0.85); }
-      100% { transform: translateY(-18px) scaleY(1.1); }
-    }
-
-    .dizzy .eye {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: #f43f5e !important;
-      box-shadow: 0 0 35px rgba(244, 63, 94, 0.9) !important;
-      animation: eye-spin 0.55s linear infinite;
-    }
+    .thinking .eye { height: 65px; width: 82px; background: #c084fc !important; box-shadow: 0 0 30px rgba(192, 132, 252, 0.9) !important; transform: translateY(-24px) !important; }
+    .dancing .eye { animation: beat-bounce 0.35s infinite alternate ease-in-out; }
+    @keyframes beat-bounce { 0% { transform: translateY(12px) scaleY(0.85); } 100% { transform: translateY(-18px) scaleY(1.1); } }
+    .dizzy .eye { width: 80px; height: 80px; border-radius: 50%; background: #f43f5e !important; box-shadow: 0 0 35px rgba(244, 63, 94, 0.9) !important; animation: eye-spin 0.55s linear infinite; }
     .dizzy .eye::after { opacity: 0; }
     @keyframes eye-spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
+  <button id="install-btn">📲 Install DABSy App</button>
   <div id="hud-overlay"><span id="hud-text">⏱ Focus Session: 25:00</span></div>
 
   <div id="robot-face">
@@ -207,6 +181,29 @@
     const hud = document.getElementById('hud-overlay');
     const hudText = document.getElementById('hud-text');
     const subtitles = document.getElementById('subtitles');
+    const installBtn = document.getElementById('install-btn');
+
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+      }
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
 
     let isDizzy = false;
     let isSleeping = false;
@@ -219,12 +216,6 @@
     let hudHideTimeout = null;
     let subHideTimeout = null;
 
-    // Service Worker Registration for App Install
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-
-    // Keep Screen Awake
     async function initWakeLock() {
       try {
         if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
@@ -232,7 +223,6 @@
     }
     window.addEventListener('click', initWakeLock, { once: true });
 
-    // Eye Themes
     function setEyeTheme(color, glow, bloom) {
       document.documentElement.style.setProperty('--eye-color', color);
       document.documentElement.style.setProperty('--eye-glow', glow);
@@ -247,7 +237,6 @@
     }
     checkNightDimming();
 
-    // Audio Engine
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
@@ -282,7 +271,6 @@
       }, 250);
     }
 
-    // Inactivity & Sleep
     function resetIdleTimer() {
       if (isSleeping) wakeUp();
       clearTimeout(idleTimer);
@@ -304,7 +292,6 @@
       setTimeout(() => { face.className = isFocusSession ? 'focus' : ''; }, 1500);
     }
 
-    // Natural Blinks
     function scheduleBlink() {
       const delay = Math.random() * 3500 + 2000;
       setTimeout(() => {
@@ -321,7 +308,6 @@
     }
     scheduleBlink();
 
-    // Gyroscope
     let gyroX = 0, gyroY = 0;
     window.addEventListener('deviceorientation', (e) => {
       if (isDizzy || isSleeping) return;
@@ -333,7 +319,6 @@
       rightEye.style.transform = `translate(${gyroX}px, ${gyroY}px)`;
     });
 
-    // Shake
     let lastX = 0, lastY = 0, lastZ = 0;
     window.addEventListener('devicemotion', (e) => {
       resetIdleTimer();
@@ -353,7 +338,6 @@
       lastX = acc.x; lastY = acc.y; lastZ = acc.z;
     });
 
-    // Touch & Gestures
     let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
 
     face.addEventListener('touchstart', (e) => {
@@ -399,7 +383,6 @@
       }
     });
 
-    // Speech & AI
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognizer = null;
 
@@ -481,7 +464,6 @@
       }
     }
 
-    // Pomodoro Timer
     function startFocusTimer(mins) {
       clearInterval(timerInterval);
       clearInterval(hydrationTimer);
@@ -527,7 +509,6 @@
       hudText.innerText = `⏱ Focus Session: ${m}:${s} | Streak: ${studyStreak}`;
     }
 
-    // HUD & Subtitles
     function showHUD() {
       hud.classList.add('visible');
       clearTimeout(hudHideTimeout);
