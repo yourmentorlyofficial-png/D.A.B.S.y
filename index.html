@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>D.A.B.S.y Companion</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <style>
     :root {
       --eye-color: #00e5ff;
@@ -214,7 +219,7 @@
     let hudHideTimeout = null;
     let subHideTimeout = null;
 
-    // 1. Keep Screen Awake
+    // 1. Keep Screen Awake on Desk
     async function initWakeLock() {
       try {
         if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
@@ -222,7 +227,7 @@
     }
     window.addEventListener('click', initWakeLock, { once: true });
 
-    // 2. Eye Themes
+    // 2. Eye Themes & Night Dimming
     function setEyeTheme(color, glow, bloom) {
       document.documentElement.style.setProperty('--eye-color', color);
       document.documentElement.style.setProperty('--eye-glow', glow);
@@ -237,7 +242,7 @@
     }
     checkNightDimming();
 
-    // 3. Synthesizer & Beatbox
+    // 3. Audio Synthesizer & Beatbox
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
@@ -272,7 +277,7 @@
       }, 250);
     }
 
-    // 4. Dozing Off System
+    // 4. Sleep & Dozing System
     function resetIdleTimer() {
       if (isSleeping) wakeUp();
       clearTimeout(idleTimer);
@@ -311,7 +316,7 @@
     }
     scheduleBlink();
 
-    // 6. Gyroscope Tilt
+    // 6. Gyroscope Tilt Tracking
     let gyroX = 0, gyroY = 0;
     window.addEventListener('deviceorientation', (e) => {
       if (isDizzy || isSleeping) return;
@@ -343,7 +348,7 @@
       lastX = acc.x; lastY = acc.y; lastZ = acc.z;
     });
 
-    // 8. Gestures & Touches
+    // 8. Gestures, Swipes & Sneeze
     let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
 
     face.addEventListener('touchstart', (e) => {
@@ -389,7 +394,7 @@
       }
     });
 
-    // 9. Speech & Free AI Routing
+    // 9. Speech Engine & Safe AI Router
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognizer = null;
 
@@ -471,7 +476,7 @@
       }
     }
 
-    // 10. Study Pomodoro & Streak
+    // 10. Study Pomodoro, Streak & Reminders
     function startFocusTimer(mins) {
       clearInterval(timerInterval);
       clearInterval(hydrationTimer);
@@ -517,7 +522,7 @@
       hudText.innerText = `⏱ Focus Session: ${m}:${s} | Streak: ${studyStreak}`;
     }
 
-    // 11. HUD & Subtitle Helpers
+    // 11. HUD & Speech Helpers
     function showHUD() {
       hud.classList.add('visible');
       clearTimeout(hudHideTimeout);
