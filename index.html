@@ -1,537 +1,312 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>D.A.B.S.y Companion</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#000000" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <style>
-    :root {
-      --eye-color: #00e5ff;
-      --eye-glow: rgba(0, 229, 255, 0.85);
-      --eye-bloom: rgba(0, 229, 255, 0.35);
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body {
-      background: #000000;
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+  <meta charset="UTF-8">
 
-    #install-btn {
-      position: absolute;
-      top: 20px;
-      padding: 10px 20px;
-      background: #00e5ff;
-      border: none;
-      border-radius: 30px;
-      color: #000;
-      font-weight: 800;
-      font-size: 13px;
-      z-index: 100;
-      display: none;
-      box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
-      cursor: pointer;
-    }
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
 
-    #hud-overlay {
-      position: absolute;
-      top: 24px;
-      padding: 8px 18px;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(14px);
-      border-radius: 30px;
-      color: var(--eye-color);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      opacity: 0;
-      transform: translateY(-15px);
-      transition: opacity 0.4s ease, transform 0.4s ease, color 0.3s;
-      pointer-events: none;
-      z-index: 10;
-    }
-    #hud-overlay.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  <meta
+    name="theme-color"
+    content="#0b1020"
+    id="themeColor"
+  >
 
-    #subtitles {
-      position: absolute;
-      bottom: 30px;
-      max-width: 86%;
-      background: rgba(10, 15, 26, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(16px);
-      padding: 12px 20px;
-      border-radius: 20px;
-      color: #e2e8f0;
-      font-size: 14px;
-      line-height: 1.45;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(15px);
-      transition: opacity 0.35s ease, transform 0.35s ease;
-      pointer-events: none;
-      z-index: 10;
-    }
-    #subtitles.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  <meta
+    name="description"
+    content="DABSy, your pocket AI assistant."
+  >
 
-    #robot-face {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 36px;
-      width: 100vw;
-      height: 100vh;
-      cursor: pointer;
-    }
+  <link rel="manifest" href="manifest.webmanifest">
 
-    .eye-wrapper {
-      position: relative;
-      width: 100px;
-      height: 145px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  <link rel="icon" href="icon-192.svg">
 
-    .eye {
-      width: 90px;
-      height: 135px;
-      background: var(--eye-color);
-      border-radius: 36px;
-      box-shadow: 0 0 28px var(--eye-glow), 0 0 65px var(--eye-bloom);
-      transition: width 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  height 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  border-radius 0.22s ease,
-                  transform 0.08s ease-out,
-                  background 0.3s ease,
-                  box-shadow 0.3s ease;
-      transform-origin: center center;
-    }
+  <link rel="stylesheet" href="style.css">
 
-    .eye::after {
-      content: '';
-      position: absolute;
-      top: 14px;
-      left: 16px;
-      width: 22px;
-      height: 22px;
-      background: #ffffff;
-      border-radius: 50%;
-      opacity: 0.85;
-      transition: opacity 0.2s;
-    }
-
-    .blinking .eye { height: 6px !important; border-radius: 4px !important; box-shadow: 0 0 10px var(--eye-glow); }
-    .blinking .eye::after { opacity: 0; }
-    .sleeping .eye { height: 6px !important; border-radius: 4px !important; background: #475569 !important; box-shadow: none !important; }
-    .sleeping .eye::after { opacity: 0; }
-    .startled .eye { width: 110px !important; height: 145px !important; border-radius: 50% !important; transform: scale(1.15) !important; }
-    .happy .eye { height: 52px !important; border-radius: 50px 50px 14px 14px !important; transform: translateY(-14px) !important; }
-    .wink #left-eye { height: 6px !important; border-radius: 4px !important; }
-    .wink #left-eye::after { opacity: 0; }
-    .wink #right-eye { height: 60px !important; border-radius: 40px 40px 10px 10px !important; }
-    .thinking .eye { height: 65px; width: 82px; background: #c084fc !important; box-shadow: 0 0 30px rgba(192, 132, 252, 0.9) !important; transform: translateY(-24px) !important; }
-    .dancing .eye { animation: beat-bounce 0.35s infinite alternate ease-in-out; }
-    @keyframes beat-bounce { 0% { transform: translateY(12px) scaleY(0.85); } 100% { transform: translateY(-18px) scaleY(1.1); } }
-    .dizzy .eye { width: 80px; height: 80px; border-radius: 50%; background: #f43f5e !important; box-shadow: 0 0 35px rgba(244, 63, 94, 0.9) !important; animation: eye-spin 0.55s linear infinite; }
-    .dizzy .eye::after { opacity: 0; }
-    @keyframes eye-spin { 100% { transform: rotate(360deg); } }
-  </style>
+  <title>DABSy</title>
 </head>
+
 <body>
 
-  <button id="install-btn">📲 Install DABSy App</button>
-  <div id="hud-overlay"><span id="hud-text">⏱ Focus Session: 25:00</span></div>
+  <main class="app">
 
-  <div id="robot-face">
-    <div class="eye-wrapper"><div class="eye" id="left-eye"></div></div>
-    <div class="eye-wrapper"><div class="eye" id="right-eye"></div></div>
-  </div>
+    <!-- TOP BAR -->
+    <header class="topbar">
 
-  <div id="subtitles"></div>
+      <div class="brand">
 
-  <script>
-    const face = document.getElementById('robot-face');
-    const leftEye = document.getElementById('left-eye');
-    const rightEye = document.getElementById('right-eye');
-    const hud = document.getElementById('hud-overlay');
-    const hudText = document.getElementById('hud-text');
-    const subtitles = document.getElementById('subtitles');
-    const installBtn = document.getElementById('install-btn');
+        <div class="logo">
+          ✦
+        </div>
 
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.style.display = 'block';
-    });
+        <div class="brand-text">
+          <strong>DABSy</strong>
+          <span>Your pocket assistant</span>
+        </div>
 
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          installBtn.style.display = 'none';
-        }
-        deferredPrompt = null;
-      }
-    });
+      </div>
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
+      <button
+        id="themeBtn"
+        class="icon-btn"
+        aria-label="Toggle theme"
+      >
+        ☾
+      </button>
 
-    let isDizzy = false;
-    let isSleeping = false;
-    let isFocusSession = false;
-    let studyStreak = 0;
-    let timerSeconds = 25 * 60;
-    let timerInterval = null;
-    let idleTimer = null;
-    let hydrationTimer = null;
-    let hudHideTimeout = null;
-    let subHideTimeout = null;
+    </header>
 
-    async function initWakeLock() {
-      try {
-        if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
-      } catch (e) {}
-    }
-    window.addEventListener('click', initWakeLock, { once: true });
 
-    function setEyeTheme(color, glow, bloom) {
-      document.documentElement.style.setProperty('--eye-color', color);
-      document.documentElement.style.setProperty('--eye-glow', glow);
-      document.documentElement.style.setProperty('--eye-bloom', bloom);
-    }
+    <!-- HERO -->
+    <section class="hero glass">
 
-    function checkNightDimming() {
-      const hour = new Date().getHours();
-      if (hour >= 22 || hour < 6) {
-        setEyeTheme('#ffb703', 'rgba(255, 183, 3, 0.85)', 'rgba(255, 183, 3, 0.3)');
-      }
-    }
-    checkNightDimming();
+      <div class="hero-content">
 
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
+        <span class="eyebrow">
+          DABSy V1
+        </span>
 
-    function playTone(freq, type = 'sine', duration = 0.15) {
-      try {
-        if (!audioCtx) audioCtx = new AudioContextClass();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    }
+        <h1>
+          What are we
+          <span>building today?</span>
+        </h1>
 
-    function playBeatbox() {
-      face.className = 'dancing';
-      speak("Dropping the study beat!");
-      let beat = 0;
-      const beatInt = setInterval(() => {
-        if (beat % 2 === 0) playTone(120, 'square', 0.1);
-        else playTone(450, 'sawtooth', 0.08);
-        beat++;
-        if (beat > 14) {
-          clearInterval(beatInt);
-          face.className = isFocusSession ? 'focus' : '';
-        }
-      }, 250);
-    }
+        <p>
+          Your personal assistant shell is ready.
+          More powers can plug in here.
+        </p>
 
-    function resetIdleTimer() {
-      if (isSleeping) wakeUp();
-      clearTimeout(idleTimer);
-      if (!isFocusSession) idleTimer = setTimeout(fallAsleep, 180000);
-    }
+        <button
+          id="installBtn"
+          class="primary-btn"
+          hidden
+        >
+          ＋ Install DABSy
+        </button>
 
-    function fallAsleep() {
-      isSleeping = true;
-      face.className = 'sleeping';
-      showSubtitle("Zzz... (Dozing off)");
-    }
+      </div>
 
-    function wakeUp() {
-      isSleeping = false;
-      face.className = 'startled';
-      playTone(580, 'sine', 0.2);
-      if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
-      speak("I'm awake! Ready for desk duty.");
-      setTimeout(() => { face.className = isFocusSession ? 'focus' : ''; }, 1500);
-    }
+      <div class="hero-orb">
+        <div class="orb-core">✦</div>
+      </div>
 
-    function scheduleBlink() {
-      const delay = Math.random() * 3500 + 2000;
-      setTimeout(() => {
-        if (!isDizzy && !isSleeping && face.className === '') {
-          face.classList.add('blinking');
-          setTimeout(() => {
-            face.classList.remove('blinking');
-            scheduleBlink();
-          }, 140);
-        } else {
-          scheduleBlink();
-        }
-      }, delay);
-    }
-    scheduleBlink();
+    </section>
 
-    let gyroX = 0, gyroY = 0;
-    window.addEventListener('deviceorientation', (e) => {
-      if (isDizzy || isSleeping) return;
-      const targetX = Math.max(-28, Math.min(28, (e.gamma || 0) * 0.9));
-      const targetY = Math.max(-22, Math.min(22, ((e.beta || 0) - 45) * 0.7));
-      gyroX += (targetX - gyroX) * 0.25;
-      gyroY += (targetY - gyroY) * 0.25;
-      leftEye.style.transform = `translate(${gyroX}px, ${gyroY}px)`;
-      rightEye.style.transform = `translate(${gyroX}px, ${gyroY}px)`;
-    });
 
-    let lastX = 0, lastY = 0, lastZ = 0;
-    window.addEventListener('devicemotion', (e) => {
-      resetIdleTimer();
-      const acc = e.accelerationIncludingGravity;
-      if (!acc) return;
-      const delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
-      if (delta > 38 && !isDizzy) {
-        isDizzy = true;
-        face.className = 'dizzy';
-        if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
-        speak("Whoa! Desk earthquake!");
-        setTimeout(() => {
-          face.className = isFocusSession ? 'focus' : '';
-          isDizzy = false;
-        }, 2500);
-      }
-      lastX = acc.x; lastY = acc.y; lastZ = acc.z;
-    });
+    <!-- QUICK ACTIONS -->
 
-    let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+    <section class="section">
 
-    face.addEventListener('touchstart', (e) => {
-      resetIdleTimer();
-      touchStartTime = Date.now();
-      
-      if (e.touches.length === 2) {
-        face.className = 'dizzy';
-        playTone(700, 'triangle', 0.25);
-        if (navigator.vibrate) navigator.vibrate([150, 50, 200]);
-        speak("Achoo! System sneeze!");
-        setTimeout(() => { face.className = ''; }, 1600);
-        return;
-      }
+      <div class="section-heading">
 
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    });
+        <div>
+          <span class="section-label">
+            QUICK ACCESS
+          </span>
 
-    face.addEventListener('touchend', (e) => {
-      const deltaX = e.changedTouches[0].clientX - touchStartX;
-      const deltaY = e.changedTouches[0].clientY - touchStartY;
-      const duration = Date.now() - touchStartTime;
+          <h2>
+            Command deck
+          </h2>
+        </div>
 
-      if (deltaY < -60 && Math.abs(deltaX) < 50) {
-        setEyeTheme('#ff5722', 'rgba(255, 87, 34, 0.9)', 'rgba(255, 87, 34, 0.4)');
-        speak("Overclock study mode activated.");
-        return;
-      }
+      </div>
 
-      if (deltaY > 60 && Math.abs(deltaX) < 50) {
-        setEyeTheme('#00e5ff', 'rgba(0, 229, 255, 0.85)', 'rgba(0, 229, 255, 0.35)');
-        speak("Chill ambient mode restored.");
-        return;
-      }
 
-      if (duration < 250 && Math.abs(deltaX) < 15 && Math.abs(deltaY) < 15) {
-        triggerVoiceInput();
-      } else if (duration >= 250 && Math.abs(deltaX) < 15) {
-        face.className = 'wink';
-        if (navigator.vibrate) navigator.vibrate(35);
-        setTimeout(() => { face.className = isFocusSession ? 'focus' : ''; }, 1200);
-      }
-    });
+      <div class="cards">
 
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognizer = null;
+        <button
+          class="card"
+          data-action="Ask DABSy"
+        >
 
-    if (SpeechRec) {
-      recognizer = new SpeechRec();
-      recognizer.lang = 'en-US';
+          <div class="card-icon">
+            💬
+          </div>
 
-      recognizer.onstart = () => {
-        showSubtitle("Listening...");
-        face.className = 'thinking';
-      };
+          <div>
+            <b>Ask DABSy</b>
 
-      recognizer.onresult = async (event) => {
-        const query = event.results[0][0].transcript;
-        showSubtitle(`"${query}"`);
-        handleRouter(query);
-      };
+            <small>
+              Chat with your assistant
+            </small>
+          </div>
 
-      recognizer.onerror = () => {
-        face.className = isFocusSession ? 'focus' : '';
-        hideSubtitle();
-      };
-    }
+          <span class="arrow">›</span>
 
-    function triggerVoiceInput() {
-      if (recognizer) {
-        try { recognizer.start(); } catch(e) {}
-      }
-    }
+        </button>
 
-    async function handleRouter(text) {
-      const lower = text.toLowerCase();
 
-      if (lower.includes('beat') || lower.includes('dance')) {
-        playBeatbox();
-        return;
-      }
+        <button
+          class="card"
+          data-action="Tasks"
+        >
 
-      if (lower.includes('start timer') || lower.includes('study') || lower.includes('focus')) {
-        startFocusTimer(25);
-        speak("25 minute focus session locked in. Time to crush it.");
-        return;
-      }
+          <div class="card-icon">
+            ✓
+          </div>
 
-      if (lower.includes('stop timer') || lower.includes('pause')) {
-        pauseFocusTimer();
-        speak("Timer paused. Take a breath.");
-        return;
-      }
+          <div>
+            <b>Tasks</b>
 
-      if (lower.includes('quiz me') || lower.includes('flashcard')) {
-        face.className = 'thinking';
-        const q = await queryZeroKeyAI(`Generate 1 single-sentence trivia/quiz question on: ${text}. No answer yet.`);
-        face.className = 'happy';
-        speak("Quiz time: " + q);
-        return;
-      }
+            <small>
+              Keep today's mission moving
+            </small>
+          </div>
 
-      await askDabsyAI(text);
-    }
+          <span class="arrow">›</span>
 
-    async function askDabsyAI(prompt) {
-      face.className = 'thinking';
-      const sys = `You are D.A.B.S.y (Desk Artificial Buddy Study), a witty, hyper-smart, and cute desk companion robot. Context: Focus Timer is ${isFocusSession ? Math.floor(timerSeconds/60) + ' min left' : 'idle'}. Rules: Max 2 sharp, friendly sentences. No markdown formatting.`;
-      
-      const reply = await queryZeroKeyAI(sys + "\nUser says: " + prompt);
-      face.className = isFocusSession ? 'focus' : 'happy';
-      speak(reply);
-      setTimeout(() => { face.className = isFocusSession ? 'focus' : ''; }, 2200);
-    }
+        </button>
 
-    async function queryZeroKeyAI(fullPrompt) {
-      try {
-        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`);
-        const text = await res.text();
-        return text.trim() || "Systems operational!";
-      } catch (err) {
-        return "Beep boop! I am here on your desk.";
-      }
-    }
 
-    function startFocusTimer(mins) {
-      clearInterval(timerInterval);
-      clearInterval(hydrationTimer);
-      timerSeconds = mins * 60;
-      isFocusSession = true;
-      face.className = 'focus';
-      updateTimerDisplay();
-      showHUD();
+        <button
+          class="card"
+          data-action="Notes"
+        >
 
-      hydrationTimer = setInterval(() => {
-        speak("Hydration checkpoint: Drink some water and blink your eyes 20 times.");
-      }, 40 * 60 * 1000);
+          <div class="card-icon">
+            ✎
+          </div>
 
-      timerInterval = setInterval(() => {
-        if (timerSeconds > 0) {
-          timerSeconds--;
-          updateTimerDisplay();
-        } else {
-          clearInterval(timerInterval);
-          clearInterval(hydrationTimer);
-          isFocusSession = false;
-          studyStreak++;
+          <div>
+            <b>Notes</b>
 
-          setEyeTheme('#ffd700', 'rgba(255, 215, 0, 0.9)', 'rgba(255, 215, 0, 0.4)');
-          face.className = 'happy';
-          if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 600]);
-          speak(`Focus session complete! You earned Golden Eyes with a streak of ${studyStreak}. Take a 5-minute break!`);
-        }
-      }, 1000);
-    }
+            <small>
+              Capture an idea instantly
+            </small>
+          </div>
 
-    function pauseFocusTimer() {
-      clearInterval(timerInterval);
-      clearInterval(hydrationTimer);
-      isFocusSession = false;
-      face.className = '';
-      hideHUD();
-    }
+          <span class="arrow">›</span>
 
-    function updateTimerDisplay() {
-      const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
-      const s = (timerSeconds % 60).toString().padStart(2, '0');
-      hudText.innerText = `⏱ Focus Session: ${m}:${s} | Streak: ${studyStreak}`;
-    }
+        </button>
 
-    function showHUD() {
-      hud.classList.add('visible');
-      clearTimeout(hudHideTimeout);
-      hudHideTimeout = setTimeout(() => hud.classList.remove('visible'), 5000);
-    }
-    function hideHUD() { hud.classList.remove('visible'); }
 
-    function showSubtitle(text) {
-      subtitles.innerText = text;
-      subtitles.classList.add('visible');
-      clearTimeout(subHideTimeout);
-      subHideTimeout = setTimeout(() => subtitles.classList.remove('visible'), 4500);
-    }
-    function hideSubtitle() { subtitles.classList.remove('visible'); }
+        <button
+          class="card"
+          data-action="Tools"
+        >
 
-    function speak(text) {
-      window.speechSynthesis.cancel();
-      showSubtitle(text);
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.pitch = 1.3;
-      utt.rate = 1.08;
-      window.speechSynthesis.speak(utt);
-    }
-  </script>
+          <div class="card-icon">
+            ⚡
+          </div>
+
+          <div>
+            <b>Tools</b>
+
+            <small>
+              Your future command deck
+            </small>
+          </div>
+
+          <span class="arrow">›</span>
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- SYSTEM STATUS -->
+
+    <section class="status glass">
+
+      <div class="status-dot"></div>
+
+      <div>
+
+        <strong>
+          DABSy systems ready
+        </strong>
+
+        <span>
+          Offline app shell enabled
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- FUTURE AREA -->
+
+    <section class="future glass">
+
+      <span class="section-label">
+        COMING NEXT
+      </span>
+
+      <h2>
+        Give DABSy a brain.
+      </h2>
+
+      <p>
+        AI chat, voice control, reminders,
+        tools and automations can plug into
+        this shell later.
+      </p>
+
+    </section>
+
+  </main>
+
+
+  <!-- BOTTOM NAVIGATION -->
+
+  <nav class="bottom-nav glass">
+
+    <button class="nav-item active">
+
+      <span>⌂</span>
+      <small>Home</small>
+
+    </button>
+
+    <button
+      class="nav-item"
+      data-action="Assistant"
+    >
+
+      <span>◎</span>
+      <small>Assistant</small>
+
+    </button>
+
+    <button
+      class="nav-item"
+      data-action="Tasks"
+    >
+
+      <span>✓</span>
+      <small>Tasks</small>
+
+    </button>
+
+    <button
+      class="nav-item"
+      data-action="Settings"
+    >
+
+      <span>⚙</span>
+      <small>Settings</small>
+
+    </button>
+
+  </nav>
+
+
+  <!-- TOAST -->
+
+  <div
+    id="toast"
+    class="toast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <script src="app.js"></script>
+
 </body>
 </html>
