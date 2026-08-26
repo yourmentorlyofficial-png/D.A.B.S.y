@@ -1,312 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  >
-
-  <meta
-    name="theme-color"
-    content="#0b1020"
-    id="themeColor"
-  >
-
-  <meta
-    name="description"
-    content="DABSy, your pocket AI assistant."
-  >
-
-  <link rel="manifest" href="manifest.webmanifest">
-
-  <link rel="icon" href="icon-192.svg">
-
-  <link rel="stylesheet" href="style.css">
-
-  <title>DABSy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DABSy — AI Study Buddy</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0a0f1d">
+  <link rel="stylesheet" href="./styles.css">
 </head>
-
 <body>
-
-  <main class="app">
-
-    <!-- TOP BAR -->
-    <header class="topbar">
-
+  <div class="app-container">
+    <!-- Header -->
+    <header>
       <div class="brand">
-
-        <div class="logo">
-          ✦
+        <div class="brand-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
         </div>
-
-        <div class="brand-text">
-          <strong>DABSy</strong>
-          <span>Your pocket assistant</span>
-        </div>
-
+        <h1>DABSy</h1>
       </div>
-
-      <button
-        id="themeBtn"
-        class="icon-btn"
-        aria-label="Toggle theme"
-      >
-        ☾
-      </button>
-
+      <div class="header-actions">
+        <button class="icon-btn" id="themeToggle" title="Toggle Theme">
+          <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        </button>
+      </div>
     </header>
 
-
-    <!-- HERO -->
-    <section class="hero glass">
-
-      <div class="hero-content">
-
-        <span class="eyebrow">
-          DABSy V1
-        </span>
-
-        <h1>
-          What are we
-          <span>building today?</span>
-        </h1>
-
-        <p>
-          Your personal assistant shell is ready.
-          More powers can plug in here.
-        </p>
-
-        <button
-          id="installBtn"
-          class="primary-btn"
-          hidden
-        >
-          ＋ Install DABSy
-        </button>
-
-      </div>
-
-      <div class="hero-orb">
-        <div class="orb-core">✦</div>
-      </div>
-
-    </section>
-
-
-    <!-- QUICK ACTIONS -->
-
-    <section class="section">
-
-      <div class="section-heading">
-
+    <!-- Main Content -->
+    <main>
+      <!-- Install Banner (Hidden by default, triggered if PWA installable) -->
+      <div id="installCard" class="install-banner" style="display: none;">
         <div>
-          <span class="section-label">
-            QUICK ACCESS
-          </span>
+          <strong>Install DABSy</strong>
+          <p style="font-size: 0.8rem; opacity: 0.9; margin-top: 2px;">Add to home screen for fast access.</p>
+        </div>
+        <button id="installBtn">Install</button>
+      </div>
 
-          <h2>
-            Command deck
-          </h2>
+      <!-- TAB 1: HOME / COMPANION -->
+      <section id="tab-home" class="tab-content active">
+        <div class="companion-card">
+          <div class="gyro-eyes">
+            <div class="eye"></div>
+            <div class="eye"></div>
+          </div>
+          <h3>DABSy is Online</h3>
+          <p class="companion-status">Ready to assist with your study session.</p>
         </div>
 
-      </div>
+        <div class="card">
+          <h3>Quick Focus Session</h3>
+          <p>Start a 25-minute Pomodoro study block to lock in.</p>
+          <button id="quickStartTimer" style="margin-top: 12px; background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer; width: 100%;">Start Focus Timer</button>
+        </div>
+      </section>
 
-
-      <div class="cards">
-
-        <button
-          class="card"
-          data-action="Ask DABSy"
-        >
-
-          <div class="card-icon">
-            💬
+      <!-- TAB 2: AI CHAT -->
+      <section id="tab-chat" class="tab-content">
+        <div class="card" style="display: flex; flex-direction: column; height: calc(100vh - 220px);">
+          <h3>Neural Study Chat</h3>
+          <div id="chatMessages" style="flex: 1; overflow-y: auto; margin: 12px 0; padding-right: 4px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="background: var(--bg-color); padding: 10px 14px; border-radius: 12px; font-size: 0.85rem; max-width: 85%;">
+              Hello! I'm DABSy. What concept or homework problem are we tackling today?
+            </div>
           </div>
-
-          <div>
-            <b>Ask DABSy</b>
-
-            <small>
-              Chat with your assistant
-            </small>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="chatInput" placeholder="Ask DABSy anything..." style="flex: 1; background: var(--bg-color); border: 1px solid var(--surface-border); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.85rem; outline: none;">
+            <button id="chatSend" class="icon-btn" style="background: var(--primary); color: white; border: none;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
           </div>
+        </div>
+      </section>
 
-          <span class="arrow">›</span>
-
-        </button>
-
-
-        <button
-          class="card"
-          data-action="Tasks"
-        >
-
-          <div class="card-icon">
-            ✓
+      <!-- TAB 3: TOOLS / POMODORO -->
+      <section id="tab-tools" class="tab-content">
+        <div class="card" style="text-align: center; padding: 30px 20px;">
+          <h3 style="margin-bottom: 4px;">Pomodoro Timer</h3>
+          <p style="margin-bottom: 20px;">Deep Work Session</p>
+          <div id="timerDisplay" style="font-size: 3rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-bottom: 20px; color: var(--primary);">25:00</div>
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="timerToggleBtn" style="background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 600; cursor: pointer;">Start</button>
+            <button id="timerResetBtn" style="background: var(--bg-color); border: 1px solid var(--surface-border); color: var(--text-main); padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer;">Reset</button>
           </div>
+        </div>
+      </section>
 
-          <div>
-            <b>Tasks</b>
+      <!-- TAB 4: SETTINGS -->
+      <section id="tab-settings" class="tab-content">
+        <div class="card">
+          <h3>System Info</h3>
+          <p style="margin-top: 6px;">Version: V1.0.0-PWA</p>
+          <p style="margin-top: 4px;">Hardware Link: Standby / Offline</p>
+        </div>
+      </section>
+    </main>
 
-            <small>
-              Keep today's mission moving
-            </small>
-          </div>
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-target="tab-home">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" data-target="tab-chat">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>AI Chat</span>
+      </button>
+      <button class="nav-item" data-target="tab-tools">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Timer</span>
+      </button>
+      <button class="nav-item" data-target="tab-settings">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1.45 1.92l-.41.11a2 2 0 0 0-1.15 2.52l.1.27a2 2 0 0 1-.1 1.98l-.21.36a2 2 0 0 0 .25 2.45l.18.15a2 2 0 0 1 1.05 1.75v.2a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1.45-1.92l.41-.11a2 2 0 0 0 1.15-2.52l-.1-.27a2 2 0 0 1 .1-1.98l.21-.36a2 2 0 0 0-.25-2.45l-.18-.15a2 2 0 0 1-1.05-1.75v-.2a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+  </div>
 
-          <span class="arrow">›</span>
-
-        </button>
-
-
-        <button
-          class="card"
-          data-action="Notes"
-        >
-
-          <div class="card-icon">
-            ✎
-          </div>
-
-          <div>
-            <b>Notes</b>
-
-            <small>
-              Capture an idea instantly
-            </small>
-          </div>
-
-          <span class="arrow">›</span>
-
-        </button>
-
-
-        <button
-          class="card"
-          data-action="Tools"
-        >
-
-          <div class="card-icon">
-            ⚡
-          </div>
-
-          <div>
-            <b>Tools</b>
-
-            <small>
-              Your future command deck
-            </small>
-          </div>
-
-          <span class="arrow">›</span>
-
-        </button>
-
-      </div>
-
-    </section>
-
-
-    <!-- SYSTEM STATUS -->
-
-    <section class="status glass">
-
-      <div class="status-dot"></div>
-
-      <div>
-
-        <strong>
-          DABSy systems ready
-        </strong>
-
-        <span>
-          Offline app shell enabled
-        </span>
-
-      </div>
-
-    </section>
-
-
-    <!-- FUTURE AREA -->
-
-    <section class="future glass">
-
-      <span class="section-label">
-        COMING NEXT
-      </span>
-
-      <h2>
-        Give DABSy a brain.
-      </h2>
-
-      <p>
-        AI chat, voice control, reminders,
-        tools and automations can plug into
-        this shell later.
-      </p>
-
-    </section>
-
-  </main>
-
-
-  <!-- BOTTOM NAVIGATION -->
-
-  <nav class="bottom-nav glass">
-
-    <button class="nav-item active">
-
-      <span>⌂</span>
-      <small>Home</small>
-
-    </button>
-
-    <button
-      class="nav-item"
-      data-action="Assistant"
-    >
-
-      <span>◎</span>
-      <small>Assistant</small>
-
-    </button>
-
-    <button
-      class="nav-item"
-      data-action="Tasks"
-    >
-
-      <span>✓</span>
-      <small>Tasks</small>
-
-    </button>
-
-    <button
-      class="nav-item"
-      data-action="Settings"
-    >
-
-      <span>⚙</span>
-      <small>Settings</small>
-
-    </button>
-
-  </nav>
-
-
-  <!-- TOAST -->
-
-  <div
-    id="toast"
-    class="toast"
-    role="status"
-    aria-live="polite"
-  ></div>
-
-
-  <script src="app.js"></script>
-
+  <script src="./app.js"></script>
 </body>
 </html>
