@@ -1,11 +1,96 @@
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
-});
+const CACHE_NAME = "dabsy-v1";
 
-self.addEventListener('activate', (e) => {
-  return self.clients.claim();
-});
+const APP_FILES = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./app.js",
+  "./manifest.webmanifest",
+  "./icon-192.svg",
+  "./icon-512.svg"
+];
 
-self.addEventListener('fetch', (e) => {
-  e.respondWith(fetch(e.request).catch(() => new Response('Offline')));
-});
+
+/* INSTALL */
+
+self.addEventListener(
+  "install",
+  event => {
+
+    event.waitUntil(
+
+      caches
+        .open(CACHE_NAME)
+        .then(cache =>
+          cache.addAll(APP_FILES)
+        )
+
+    );
+
+    self.skipWaiting();
+
+  }
+);
+
+
+/* ACTIVATE */
+
+self.addEventListener(
+  "activate",
+  event => {
+
+    event.waitUntil(
+
+      caches
+        .keys()
+        .then(keys =>
+
+          Promise.all(
+
+            keys
+              .filter(
+                key =>
+                  key !== CACHE_NAME
+              )
+              .map(key =>
+                caches.delete(key)
+              )
+
+          )
+
+        )
+
+    );
+
+    self.clients.claim();
+
+  }
+);
+
+
+/* FETCH */
+
+self.addEventListener(
+  "fetch",
+  event => {
+
+    event.respondWith(
+
+      caches
+        .match(event.request)
+        .then(cached => {
+
+          return (
+            cached ||
+            fetch(event.request)
+          );
+
+        })
+        .catch(() =>
+          caches.match("./index.html")
+        )
+
+    );
+
+  }
+);
