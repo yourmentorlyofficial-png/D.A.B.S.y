@@ -1,0 +1,86 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="512"
+  height="512"
+  viewBox="0 0 512 512"
+>
+  <defs>
+
+    <!-- Cyan glow -->
+    <filter
+      id="glow"
+      x="-100%"
+      y="-100%"
+      width="300%"
+      height="300%"
+    >
+      <feGaussianBlur
+        stdDeviation="18"
+        result="blur"
+      />
+
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+  </defs>
+
+
+  <!-- Black background -->
+
+  <rect
+    width="512"
+    height="512"
+    rx="110"
+    fill="#000000"
+  />
+
+
+  <!-- LEFT EYE -->
+
+  <rect
+    x="82"
+    y="130"
+    width="175"
+    height="275"
+    rx="72"
+    fill="#08D9F2"
+    filter="url(#glow)"
+  />
+
+
+  <!-- RIGHT EYE -->
+
+  <rect
+    x="255"
+    y="130"
+    width="175"
+    height="275"
+    rx="72"
+    fill="#08D9F2"
+    filter="url(#glow)"
+  />
+
+
+  <!-- LEFT EYE HIGHLIGHT -->
+
+  <circle
+    cx="124"
+    cy="172"
+    r="34"
+    fill="#E8FBFF"
+  />
+
+
+  <!-- RIGHT EYE HIGHLIGHT -->
+
+  <circle
+    cx="297"
+    cy="172"
+    r="34"
+    fill="#E8FBFF"
+  />
+
+</svg>
